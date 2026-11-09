@@ -9,7 +9,11 @@ A small, tested restyle of the CleanYourTV launcher for a 1080p Hartens HTY-43F1
 - Greeting and two-line date use normal case, Outfit Regular and tighter spacing.
 - Greeting is 16sp; the date is 18sp with no added line gap.
 - The clock/date divider is vertically centred.
-- The cinematic shelf omits the “Last opened” metadata and keeps the position dots directly below the app title.
+- The cinematic shelf omits both the “Last opened” metadata and the animated position dots.
+- Icon-only app cards keep their single focused name below the card; the duplicate in-card caption is hidden.
+- The dock derives horizontal and vertical padding from the active focus zoom and actual card size, leaving an
+  exact 10dp post-focus clearance on all four sides (20px at the Hartens TV's 320dpi density).
+- Focus uses a crisp 2dp app-coloured rim with no blurred halo, glass fill or specular sheen.
 - The top button row has equal 56dp top and right insets at 1920×1080.
 - Everything else stays on the upstream CleanYourTV launcher.
 

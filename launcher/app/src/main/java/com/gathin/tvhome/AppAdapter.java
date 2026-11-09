@@ -442,12 +442,13 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             iconLp.bottomMargin = 0;
             icon.setLayoutParams(iconLp);
         } else if (h < Math.round(DESIGN_H_DP * density)) {
-            // Shrunk tiles (e.g. 5 or 6 columns): scale icon and bottom margin proportionally with tile height so the label does not overlap the icon.
+            // Shrunk tiles (e.g. 5 or 6 columns): scale the centred icon with the tile. The app name is shown
+            // below the card on focus, so the old in-card caption and its bottom offset stay out of the artwork.
             View icon = v.findViewById(R.id.icon);
             FrameLayout.LayoutParams iconLp = (FrameLayout.LayoutParams) icon.getLayoutParams();
             float scale = (float) h / (DESIGN_H_DP * density);
             iconLp.width = iconLp.height = Math.round(48f * density * scale);
-            iconLp.bottomMargin = Math.round(14f * density * scale);
+            iconLp.bottomMargin = 0;
             icon.setLayoutParams(iconLp);
             View label = v.findViewById(R.id.label);
             label.setPadding(label.getPaddingLeft(), label.getPaddingTop(), label.getPaddingRight(), Math.round(4f * density));
@@ -506,7 +507,9 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             h.icon.setImageDrawable(e.icon);
             h.icon.setVisibility(View.VISIBLE);
             h.label.setText(e.label);
-            h.label.setVisibility(uniformTiles ? View.GONE : View.VISIBLE);
+            // The focused name below the card is the single label. Keeping another copy inside icon-only cards
+            // produced duplicates such as "File manager" twice and crowded the artwork.
+            h.label.setVisibility(View.GONE);
         }
         h.card.setOnClickListener(v -> launch(e));
         h.card.setOnLongClickListener(v -> {

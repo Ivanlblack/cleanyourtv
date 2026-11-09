@@ -34,6 +34,8 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     private final boolean singleRow;
     /** dock_band_all: in a single row, the band runs behind every app instead of the dock apps only. */
     private final boolean bandAll;
+    /** The card's configured focus scale; used to keep the visible end gap equal to the vertical gap. */
+    private final float focusScale;
 
     /**
      * @param translucent the cinematic shelf's band: the artwork and the glow show through it.
@@ -44,9 +46,10 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
      * @param bandVisible false skips the band and its edge, so the tiles float on the wallpaper (dock_band).
      * @param singleRow   every app sits in the dock's row (single_row); the band covers the dock apps only, unless bandAll.
      * @param bandAll     with singleRow, the band runs behind every app in the row (dock_band_all).
+     * @param focusScale  the scale applied to a focused card; 1 when animations are off.
      */
     DockDecoration(int dockSize, float density, boolean translucent, boolean names, int opacity, boolean lightGlass,
-                   boolean evenPadding, boolean bandVisible, boolean singleRow, boolean bandAll) {
+                   boolean evenPadding, boolean bandVisible, boolean singleRow, boolean bandAll, float focusScale) {
         this.dockSize = dockSize;
         this.singleRow = singleRow;
         this.bandAll = singleRow && bandAll;
@@ -55,6 +58,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         this.lightGlass = lightGlass;
         this.evenPadding = evenPadding;
         this.bandVisible = bandVisible;
+        this.focusScale = focusScale;
         band.setColor(translucent ? 0x8C121014 : (Math.round(opacity * 2.55f) << 24) | 0x141416);
         edge.setStyle(Paint.Style.STROKE);
         edge.setStrokeWidth(density);
@@ -75,6 +79,11 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         return Math.max(0f, Math.min(gap, roomPx));
     }
 
+    /** Band padding before focus that leaves targetGapPx visible after this card axis scales around its centre. */
+    static float focusedPaddingPx(int cardExtentPx, float scale, float targetGapPx) {
+        return targetGapPx + Math.max(0, cardExtentPx) * Math.max(0f, scale - 1f) / 2f;
+    }
+
     @Override
     public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent,
                                @NonNull RecyclerView.State state) {
@@ -90,6 +99,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         if (!bandVisible) return;
         boolean any = false;
         int cardWidth = 0;
+        int cardHeight = 0;
         for (int i = 0; i < parent.getChildCount(); i++) {
             View child = parent.getChildAt(i);
             int pos = parent.getChildAdapterPosition(child);
@@ -102,6 +112,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             float r = l + card.getWidth();
             float b = t + card.getHeight();
             cardWidth = card.getWidth();
+            cardHeight = card.getHeight();
             if (!any) {
                 rect.set(l, t, r, b);
                 any = true;
@@ -110,13 +121,16 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             }
         }
         if (!any) return;
-        float pad = 14 * density;
+        // The post-focus clearance is the contract, not the band's unscaled padding. On this 320dpi TV 10dp is
+        // exactly 20px. Width and height grow by different amounts, so calculate both axes independently.
+        float targetGap = 10 * density;
+        float verticalPad = focusedPaddingPx(cardHeight, focusScale, targetGap);
         // The band can only draw inside the grid, and the first and last dock tiles sit 12dp in from its
         // edges: a full 14dp at the sides sliced the rounded ends flat (#454). Keep the sides, with the
         // 1dp edge line, inside the grid; the top and bottom have room.
-        // 22dp at the sides (the grid's 10dp padding makes room): a focused first or last tile grows about 7dp
-        // outwards and still keeps about the band's top margin from its rounded end.
-        float sidePad = 22 * density;
+        // The actual laid-out card and active focus scale decide the end inset. On the Hartens this is 354x199px
+        // at 1.12x: 41.24px horizontally and 31.94px vertically, leaving exactly 20px after focus on every side.
+        float sidePad = focusedPaddingPx(cardWidth, focusScale, targetGap);
         float side = Math.max(0f, Math.min(sidePad, Math.min(rect.left, parent.getWidth() - rect.right) - density));
         float radius = AppAdapter.cornerRadius(cardWidth, density);
         if (evenPadding) {
@@ -129,7 +143,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             radius = radiusPx(radius, even);
         } else {
             // dock_even_padding off: the band as before, with its fixed 26 dp corners.
-            rect.inset(singleRow ? -sidePad : -side, -pad);
+            rect.inset(singleRow ? -sidePad : -side, -verticalPad);
             radius = 26 * density;
         }
         if (singleRow) {

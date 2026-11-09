@@ -318,7 +318,8 @@
     <bool name="dock_band_all">false</bool>
     <!-- The dock band's padding equals the gap between its tiles on all four sides (as far as the grid's edges leave room),
          so its corners are concentric with the tiles' and the spacing reads even. false (the default) keeps the fixed
-         14dp above and below, up to 22dp at the sides and 26dp corners. Can also be set with "dock_even_padding": true in a theme's config.json. -->
+         focus-aware padding that leaves the same 10dp visible gap on every side, with 26dp corners. Can also be set with
+         "dock_even_padding": true in a theme's config.json. -->
     <bool name="dock_even_padding">false</bool>
     <!-- A reorder button (two arrows) in the top bar. Off by default: reordering is also in the Settings
          button's long-press menu, so it needs no extra button on screen. -->
@@ -492,7 +493,7 @@
     <bool name="cinematic_home">false</bool>
     <!-- With cinematic_home, false leaves out the dock position dots under the app's name, for a quieter shelf. Can
          also be set with "cinematic_dots": false in a theme's config.json. -->
-    <bool name="cinematic_dots">true</bool>
+    <bool name="cinematic_dots">false</bool>
     <!-- With cinematic_home, true keeps the focus highlight white on the dock instead of the focused app's colour,
          for wallpapers and banners that clash with it; app_glow still colours every tile. Can also be set with
          "cinematic_white_focus": true in a theme's config.json. -->
@@ -545,7 +546,7 @@
     <!-- The focus highlight's look: glass (the default: a translucent slab with a bright top sheen, a crisp rim and a
          faint outer glow), rim (the crisp rim alone, no sheen, fill or glow, for a quiet focus over a wallpaper) or
          halo (the rim with a lighter outer glow). Can also be set with "glass_style": "rim" in a theme's config.json. -->
-    <string name="glass_style" translatable="false">glass</string>
+    <string name="glass_style" translatable="false">rim</string>
 
     <!-- Tiles drawn from the app's icon and name instead of its banner (for banners that crop badly). -->
     <string-array name="icon_tiles" translatable="false">

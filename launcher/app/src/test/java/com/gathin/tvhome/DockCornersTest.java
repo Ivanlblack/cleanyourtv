@@ -21,6 +21,17 @@ public class DockCornersTest {
         assertEquals(0f, DockDecoration.evenPaddingPx(1000, 0, 200, 30f), 0.001f);
     }
 
+    @Test public void focusedPaddingLeavesTwentyPixelsOnEverySide() {
+        float horizontal = DockDecoration.focusedPaddingPx(354, 1.12f, 20f);
+        float vertical = DockDecoration.focusedPaddingPx(199, 1.12f, 20f);
+        float horizontalGrowth = 354f * 0.12f / 2f;
+        float verticalGrowth = 199f * 0.12f / 2f;
+        assertEquals(20f, horizontal - horizontalGrowth, 0.001f);
+        assertEquals(20f, vertical - verticalGrowth, 0.001f);
+        assertEquals(41.24f, horizontal, 0.001f);
+        assertEquals(31.94f, vertical, 0.001f);
+    }
+
     @Test public void evenPaddingStaysPositiveAndBelowTheCellFromFourToSevenColumns() {
         for (int columns = 4; columns <= 7; columns++) {
             int tile = AppAdapter.tileWidthPx(INNER, columns, DENSITY);
